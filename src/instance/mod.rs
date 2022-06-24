@@ -1,4 +1,3 @@
-pub mod greedy;
 pub mod heuristic;
 
 use std::{collections::HashMap, fmt, io};
