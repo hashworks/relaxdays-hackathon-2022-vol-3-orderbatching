@@ -9,12 +9,7 @@ impl Batch {
         let mut warehouses: HashMap<usize, HashSet<usize>> = HashMap::new();
 
         for item in &self.items {
-            let location = instance
-                .article_locations
-                .iter()
-                .filter(|article| article.article_id == item.article_id)
-                .next()
-                .expect("Unknown article id");
+            let location = &instance.article_id_location_map[&item.article_id];
 
             warehouses
                 .entry(location.warehouse)
@@ -47,11 +42,8 @@ impl Solution {
 
 #[test]
 fn calculation() {
-    let instance_file =
-        std::fs::File::open("instances/instance0.json").expect("Failed to open instance JSON file");
-
-    let instance: instance::Instance =
-        serde_json::from_reader(instance_file).expect("Failed to parse instance JSON");
+    let instance = instance::Instance::new_from_file("instances/instance0.json")
+        .expect("Failed to load instances/instance0.json");
 
     let solution_file =
         std::fs::File::open("solutions/solution0.json").expect("Failed to open solution JSON file");

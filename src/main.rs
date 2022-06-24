@@ -1,6 +1,3 @@
-// TODO: Remove
-#![allow(dead_code)]
-
 mod instance;
 mod solution;
 
@@ -17,13 +14,11 @@ fn main() {
         exit(2);
     }
 
-    let instance_file =
-        std::fs::File::open(instance_path.unwrap()).expect("Failed to open instance JSON file");
+    let instance = instance::Instance::new_from_file(&instance_path.unwrap()).unwrap();
 
-    let instance: instance::Instance =
-        serde_json::from_reader(instance_file).expect("Failed to parse instance JSON");
+    // Nice training, but stupid
+    //let _greedy_solution = instance.generate_greedy_solution();
 
-    let _greedy_solution = instance.generate_greedy_solution();
     let _heuristic_solution = instance.generate_heuristic_solution();
 
     //println!("Storing best solution with a cost of {}.", solution.cost());
