@@ -27,16 +27,24 @@ impl Batch {
 }
 
 impl Solution {
-    pub fn cost(&self, instance: &instance::Instance) -> usize {
-        let tour_cost = self
-            .batches
+    pub fn cost(&self, instance: &instance::Instance) -> (usize, usize) {
+        let batches = if !self.batches.is_empty() {
+            self.batches.clone()
+        } else {
+            self.waves
+                .iter()
+                .flat_map(|wave| wave.batches.clone())
+                .collect::<Vec<_>>()
+        };
+
+        let tour_cost = batches
             .iter()
             .map(|batch| batch.cost(instance))
             .sum::<usize>();
 
-        let rest_cost = self.waves.len() * 10 + self.batches.len() * 5;
+        let rest_cost = self.waves.len() * 10 + batches.len() * 5;
 
-        tour_cost + rest_cost
+        (tour_cost, rest_cost)
     }
 }
 
@@ -45,11 +53,8 @@ fn calculation() {
     let instance = instance::Instance::new_from_file("instances/instance0.json")
         .expect("Failed to load instances/instance0.json");
 
-    let solution_file =
-        std::fs::File::open("solutions/solution0.json").expect("Failed to open solution JSON file");
+    let solution = Solution::_new_from_file("solutions/solution0.json")
+        .expect("Failed to load solutions/solution0.json");
 
-    let solution: Solution =
-        serde_json::from_reader(solution_file).expect("Failed to parse solution JSON");
-
-    assert_eq!(solution.cost(&instance), 665);
+    assert_eq!(solution.cost(&instance), (545, 120));
 }

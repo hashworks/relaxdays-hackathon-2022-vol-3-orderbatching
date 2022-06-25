@@ -1,43 +1,9 @@
-pub mod heuristic;
+pub mod solver;
 
-use std::{collections::HashMap, fmt, io};
+use std::collections::HashMap;
 
+use rand::seq::SliceRandom;
 use serde::Deserialize;
-
-#[derive(Debug)]
-pub struct Error {
-    kind: String,
-    message: String,
-
-    #[allow(dead_code)]
-    source: Option<Box<dyn std::error::Error>>,
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "AoCError [{}]: {}", self.kind, self.message)
-    }
-}
-
-impl From<io::Error> for Error {
-    fn from(error: io::Error) -> Self {
-        Error {
-            kind: String::from("io"),
-            message: error.to_string(),
-            source: Some(Box::new(error)),
-        }
-    }
-}
-
-impl From<serde_json::Error> for Error {
-    fn from(error: serde_json::Error) -> Self {
-        Error {
-            kind: String::from("json"),
-            message: error.to_string(),
-            source: Some(Box::new(error)),
-        }
-    }
-}
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "PascalCase")]
@@ -46,11 +12,11 @@ pub struct Instance {
     pub orders: Vec<Order>,
     pub articles: Vec<Article>,
 
-    #[serde(skip_deserializing)]
+    #[serde(skip)]
     pub order_id_article_ids_map: HashMap<usize, Vec<usize>>,
-    #[serde(skip_deserializing)]
+    #[serde(skip)]
     pub article_id_location_map: HashMap<usize, ArticleLocation>,
-    #[serde(skip_deserializing)]
+    #[serde(skip)]
     pub article_id_volume_map: HashMap<usize, usize>,
 }
 
@@ -63,7 +29,7 @@ pub struct ArticleLocation {
     pub article_id: usize,
 }
 
-#[derive(Debug, Deserialize, PartialEq, Eq, PartialOrd, Ord, Clone, Hash)]
+#[derive(Debug, Deserialize, Clone, Hash)]
 #[serde(rename_all = "PascalCase")]
 pub struct Order {
     pub order_id: usize,
@@ -78,7 +44,7 @@ pub struct Article {
 }
 
 impl Instance {
-    pub fn generate_maps(&mut self) {
+    fn generate_maps(&mut self) {
         self.order_id_article_ids_map = self
             .orders
             .iter()
@@ -96,13 +62,17 @@ impl Instance {
             .collect();
     }
 
-    pub fn new_from_file(path: &str) -> Result<Instance, Error> {
-        let instance_file = std::fs::File::open(path)?;
+    pub fn new_from_file(path: &str) -> Result<Self, Box<dyn std::error::Error>> {
+        let file = std::fs::File::open(path)?;
 
-        let mut instance: Instance = serde_json::from_reader(instance_file)?;
+        let mut new_self: Self = serde_json::from_reader(file)?;
 
-        instance.generate_maps();
+        new_self.generate_maps();
 
-        Ok(instance)
+        Ok(new_self)
+    }
+
+    pub fn shuffle_orders(&mut self) {
+        self.orders.shuffle(&mut rand::thread_rng());
     }
 }
