@@ -8,8 +8,10 @@ You can get a running version of this code by using:
 
 ```bash
 docker build -t orderbatching-kromlinger-justin .
-docker run -v $(PWD)/instances:/instances:ro -v $(PWD)/solutions:/solutions:rw orderbatching-kromlinger-justin /instances/instance_1.json /solutions/solution_1.json
+docker run -v $(pwd)/instances:/instances:ro -v $(pwd)/solutions:/solutions:rw orderbatching-kromlinger-justin /instances/instance1.json /solutions/solution1.json
 ```
+
+Due to randomized runs and a hard 5 minutes runtime limit provided by RelaxDays it will always run for about 4 minutes.
 
 ## Findings
 
