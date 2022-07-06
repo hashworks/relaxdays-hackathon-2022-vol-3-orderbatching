@@ -35,8 +35,10 @@ fn main() {
     println!("Solving…");
 
     'forever: loop {
+        // We might randomly get better results if we shuffle the orders a bit
         instance.shuffle_orders();
 
+        // Try out various divergences, store best
         for maximum_allowed_divergence in 0..=5 {
             let solution = instance.solve(maximum_allowed_divergence);
             let cost = solution.cost(&instance);
@@ -45,6 +47,7 @@ fn main() {
                 best_solution = solution;
             }
 
+            // Try to find a better solution until we run out of time
             if start.elapsed().as_secs() > TIMEOUT_MINUTES * 60 {
                 break 'forever;
             }

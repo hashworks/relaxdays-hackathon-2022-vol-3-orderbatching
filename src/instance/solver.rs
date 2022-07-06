@@ -25,6 +25,7 @@ impl Instance {
                 .push(order.clone());
         }
 
+        // Convert map to vector so we can sort it
         // Funny thing: Iterating over this HashMap gives warehouse_order_vector a random order, giving us different scores each time
         let mut warehouse_order_vector = warehouse_order_map
             .iter()
@@ -35,32 +36,13 @@ impl Instance {
             warehouses_a.len().cmp(&warehouses_b.len())
         });
 
-        /*
-            for (warehouses, orders) in warehouse_order_vector {
-                println!("W {:?}: {} orders", warehouses, orders.len());
-            }
-
-            W [0, 1, 2, 4, 6, 7, 12, 13, 15]: 1 orders
-            W [1, 4, 6, 7, 10, 11, 12, 14, 15]: 1 orders
-            W [4, 5, 6, 8, 9, 11, 12, 14, 15]: 1 orders
-            W [0, 1, 5, 8, 9, 10, 11, 12, 14]: 1 orders
-            W [1, 2, 4, 7, 8, 9, 10, 11, 12]: 1 orders
-            W [0, 3, 4, 5, 8, 10, 11, 12, 14]: 1 orders
-            [...]
-            W [7]: 29 orders
-            W [10]: 34 orders
-            W [6]: 26 orders
-            W [15]: 34 orders
-            W [4]: 26 orders
-            W [9]: 32 orders
-        */
-
         let mut warehouses_waves: HashMap<Vec<usize>, Vec<Wave>> = HashMap::new();
 
         while let Some((warehouses_a, mut orders)) = warehouse_order_vector.pop() {
             let mut wave = Wave::new();
             'orderloop: while let Some(order) = orders.pop() {
-                // Try to add orders to existing waves with matching warehouses
+                // Try to add orders to existing waves with matching warehouses with a specific allowed divergence
+                // F.e.: A wave with warehouses [1,2,3] will also take orders with warehouses [1,2,3] or [1,2] if the divergence is 1
                 for allowed_divergence in 0..=maximum_allowed_divergence {
                     for (warehouses_b, waves) in warehouses_waves.iter_mut() {
                         let divergence = warehouses_a
@@ -107,6 +89,8 @@ impl Instance {
             solution.waves.append(&mut waves);
         }
 
+        // Optimize wave and batch sizes – f.e. move small waves into other waves if they fit
+        // Also: Set ids etc. for JSON export
         solution.finalize();
 
         solution

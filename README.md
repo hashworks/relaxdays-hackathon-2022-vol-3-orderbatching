@@ -1,6 +1,6 @@
 # orderbatching
 
-Solution for a warehouse-problem of the RelaxDays summer hackathon in 2022.
+Winning solution for a warehouse-problem of the RelaxDays summer hackathon in 2022.
 
 ## How to run this project
 
